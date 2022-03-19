@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>912205676637-3ijbehbci3job7fmea0vtlp0dj36go5r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.912205676637-3ijbehbci3job7fmea0vtlp0dj36go5r</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDG6n2b_7xo2lO2g3qCR-m7Rl-nFNtXIGA</string>
+	<key>GCM_SENDER_ID</key>
+	<string>912205676637</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.goCamping</string>
+	<key>PROJECT_ID</key>
+	<string>gocamping-6f09e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gocamping-6f09e.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:912205676637:ios:e83d3a52b9b3df5c920db4</string>
+</dict>
+</plist>
