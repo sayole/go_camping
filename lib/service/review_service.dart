@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class ReviewService extends ChangeNotifier {
@@ -9,24 +10,24 @@ class ReviewService extends ChangeNotifier {
     return reviewCollection.where('uid', isEqualTo: uid).get();
   }
 
-  void create(String job, String uid) async {
+  void create(String review, String uid, double star) async {
     // review 만들기
     await reviewCollection.add({
       'uid': uid, // 유저 식별자
-      'review': job, // 하고싶은 일
-      'isDone': false, // 완료 여부
+      'review': review, // 남긴 후기
+      'star': star, // 별점 갯수
     });
     notifyListeners(); // 화면 갱신
   }
 
-  void update(String docId, bool isDone) async {
-    // bucket isDone 업데이트
-    await reviewCollection.doc(docId).update({'isDone': isDone});
+  void update(String docId, String review) async {
+    // review 업데이트
+    await reviewCollection.doc(docId).update({'review': review});
     notifyListeners(); // 화면 갱신
   }
 
   void delete(String docId) async {
-    // bucket 삭제
+    // review 삭제
     await reviewCollection.doc(docId).delete();
     notifyListeners(); // 화면 갱신
   }
