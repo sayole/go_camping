@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:go_camping/campingData.dart';
+import 'package:go_camping/main.dart';
 import 'package:go_camping/service/auth_service.dart';
 import 'package:go_camping/service/review_service.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'loginPage.dart';
+import 'package:expandable_text/expandable_text.dart';
 
 /// 리뷰 보는 페이지
 class HomePage extends StatefulWidget {
@@ -17,6 +21,9 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+var ratingSum = 0;
+var ratingList = [];
+
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
@@ -25,7 +32,10 @@ class _HomePageState extends State<HomePage> {
     return Consumer<ReviewService>(builder: (context, reviewService, child) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("고캠핑 리뷰"),
+          title: Text(
+            "고캠핑 리뷰",
+            style: TextStyle(color: Palette.green),
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -40,80 +50,112 @@ class _HomePageState extends State<HomePage> {
               },
               child: Text(
                 '로그아웃',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Palette.green,
+                ),
               ),
             )
           ],
         ),
-        body: Column(
+        body: ListView(
+          physics: AlwaysScrollableScrollPhysics(),
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.network(
-                    "https://s3.amazonaws.com/imagescloud/images/medias/annexes/annexe-camping-2022.jpg"),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            Image.network("${SelectedData.selectedItem?.firstImageUrl}"), // 이미지
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${SelectedData.selectedItem?.facltNm}", // 캠핑장 이름
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "${SelectedData.selectedItem?.lineIntro}", // 캠핑장 한줄 소개
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Row(
                     children: [
-                      Text(
-                        "캠핑장 이름",
-                        style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "캠핑장 한줄 소개",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Row(
-                        children: [
-                          Text("⭐️ 4.24"),
-                          Text(" · "),
-                          Text("리뷰 갯수 12개"),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "캠핑장 상세주소 1, ",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            "캠핑장 상세주소 2",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      Divider(),
-                      Text(
-                          "캠핑장 소개에 대한 글이 들어갑니다 캠핑장 소개에 대한 글이 들어갑니다 캠핑장 소개에 대한 글이 들어갑니다 캠핑장 소개에 대한 글이 들어갑니다 캠핑장 소개에 대한 글이 들어갑니다 ")
+                      Text("⭐️ 4.24"),
+                      Text(" · "),
+                      Text("리뷰 갯수 12개"),
                     ],
                   ),
-                ),
-              ],
+                  Text(
+                    "${SelectedData.selectedItem?.addr1} ",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  Divider(),
+                  // 캠핑장 설명
+                  Text("소개말", style: TextStyle(fontSize: 20)),
+                  // 캠핑장 소개 글
+                  ExpandableText(
+                    "${SelectedData.selectedItem?.intro}",
+                    expandText: 'show more',
+                    collapseText: 'show less',
+                    maxLines: 3,
+                    linkColor: Palette.green,
+                  ),
+                  SizedBox(height: 5),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Palette.green,
+                    ),
+                    onPressed: () {
+                      launch("${SelectedData.selectedItem?.resveUrl}"); // 예약
+                    },
+                    child: Text("예약하러 가기"),
+                  ),
+                ],
+              ),
             ),
-            Expanded(
+            Container(
               child: FutureBuilder<QuerySnapshot>(
-                future: reviewService.read(user.uid),
+                future:
+                    reviewService.read(SelectedData.selectedItem?.contentId),
                 builder: (context, snapshot) {
                   final documents = snapshot.data?.docs ?? []; // 문서들 가져오기
+                  final docmany = documents.length;
                   if (documents.isEmpty) {
                     return Center(child: Text("리뷰가 없어요! 남겨주세용"));
                   }
                   return ListView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
                     itemCount: documents.length,
                     itemBuilder: (context, index) {
                       final doc = documents[index];
                       String review = doc.get('review');
                       double rating = doc.get('star');
+                      int ratingInt = rating.toInt();
+                      //리뷰 ListTile
                       return ListTile(
                         title: Text(review),
-                        subtitle: Text('$rating'),
-                        trailing: IconButton(
-                          icon: Icon(CupertinoIcons.delete),
-                          onPressed: () {},
-                        ),
+                        subtitle: StarDisplay(value: ratingInt),
+                        trailing: doc.get('uid') != user.uid
+                            ? Text('')
+                            : Wrap(
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      // + 버튼 클릭시 리뷰 생성 페이지로 이동
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => CreatePage()),
+                                      );
+                                    },
+                                    icon: Icon(Icons.edit),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(CupertinoIcons.delete),
+                                    onPressed: () {
+                                      reviewService.delete(doc.id);
+                                    },
+                                  ),
+                                ],
+                              ),
                       );
                     },
                   );
@@ -145,7 +187,7 @@ class CreatePage extends StatefulWidget {
   State<CreatePage> createState() => _CreatePageState();
 }
 
-double rating = 1;
+double star = 0;
 
 class _CreatePageState extends State<CreatePage> {
   TextEditingController jobController = TextEditingController();
@@ -187,9 +229,9 @@ class _CreatePageState extends State<CreatePage> {
                     Text('별점 남기기'),
                     RatingBar.builder(
                       initialRating: 0,
-                      minRating: 0,
+                      minRating: 1,
                       direction: Axis.horizontal,
-                      allowHalfRating: true,
+                      allowHalfRating: false,
                       itemCount: 5,
                       itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
                       itemBuilder: (context, _) => Icon(
@@ -198,6 +240,7 @@ class _CreatePageState extends State<CreatePage> {
                       ),
                       onRatingUpdate: (rating) {
                         print(rating);
+                        star = rating;
                       },
                     ),
                   ],
@@ -217,10 +260,8 @@ class _CreatePageState extends State<CreatePage> {
                   onPressed: () {
                     // 추가하기 버튼 클릭시
                     if (jobController.text.isNotEmpty) {
-                      reviewService.create(
-                          jobController.text, user.uid, rating);
+                      reviewService.create(jobController.text, user.uid, star);
                       print('생성하기');
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => HomePage()),
@@ -234,5 +275,26 @@ class _CreatePageState extends State<CreatePage> {
         ),
       );
     });
+  }
+}
+
+class StarDisplay extends StatelessWidget {
+  final int value;
+
+  const StarDisplay({Key? key, this.value = 0})
+      : assert(value != null),
+        super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (index) {
+        return Icon(
+          index < value ? Icons.star : Icons.star_border,
+          color: Colors.amber,
+          size: 16.5,
+        );
+      }),
+    );
   }
 }

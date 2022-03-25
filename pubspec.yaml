@@ -38,8 +38,11 @@ dependencies:
   firebase_auth: ^3.3.4
   cloud_firestore: ^3.1.4
   provider: ^6.0.2
-  dio: ^4.0.4
   flutter_rating_bar: ^4.0.0
+  dio: ^4.0.4
+  url_launcher: ^6.0.20
+  expandable_text: ^2.2.0
+  google_fonts: ^2.3.1
 
 dev_dependencies:
   flutter_test:
