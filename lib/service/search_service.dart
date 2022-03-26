@@ -19,6 +19,8 @@ class SearchService extends ChangeNotifier {
     );
 
     for (var item in result.data['response']['body']['items']['item']) {
+      print(item['lineIntro']);
+      if (item['lineIntro'] == null && item['firstImageUrl'] == null) continue;
       campingList.add(CampingData.fromJson(item));
     }
 

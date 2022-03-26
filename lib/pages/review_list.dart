@@ -21,16 +21,27 @@ class HomePage extends StatelessWidget {
   bool hasReview = false;
   bool isReviewOwner = false;
   int reviewCount = 0;
+  double starCount = 0;
+
+  void totalStar(final document) {
+    double total = 0;
+    for (final doc in document) {
+      total += doc.get('star');
+    }
+    starCount = total;
+  }
+
   @override
   Widget build(BuildContext context) {
     final authService = context.read<AuthService>();
     final user = authService.currentUser()!;
+
     return Consumer<ReviewService>(builder: (context, reviewService, child) {
       return Scaffold(
         appBar: AppBar(
           title: Text(
             "고캠핑 리뷰",
-            style: TextStyle(color: Palette.green),
+            style: TextStyle(color: Colors.white),
           ),
           actions: [
             TextButton(
@@ -48,7 +59,7 @@ class HomePage extends StatelessWidget {
                 '로그아웃',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Palette.green,
+                  color: Colors.white,
                 ),
               ),
             )
@@ -70,13 +81,6 @@ class HomePage extends StatelessWidget {
                   Text(
                     "${SelectedData.selectedItem?.lineIntro}", // 캠핑장 한줄 소개
                     style: TextStyle(fontSize: 18),
-                  ),
-                  Row(
-                    children: [
-                      Text("⭐️ 4.24"),
-                      Text(" · "),
-                      Text("리뷰 갯수 " + reviewCount.toString() + "개"),
-                    ],
                   ),
                   Text(
                     "${SelectedData.selectedItem?.addr1} ",
@@ -113,53 +117,71 @@ class HomePage extends StatelessWidget {
                 builder: (context, snapshot) {
                   final documents = snapshot.data?.docs ?? []; // 문서들 가져오기
                   reviewCount = documents.length;
+                  totalStar(documents);
+                  double starAdded = 0;
                   if (documents.isEmpty) {
                     return Center(child: Text("리뷰가 없어요! 남겨주세용"));
                   }
-                  return ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: documents.length,
-                    itemBuilder: (context, index) {
-                      final doc = documents[index];
-                      String review = doc.get('review');
-                      double rating = doc.get('star');
-                      int ratingInt = rating.toInt();
-                      isReviewOwner = doc.get('uid') == user.uid;
-                      if (isReviewOwner == true) {
-                        hasReview = true;
-                      }
-                      print(reviewCount);
-                      //리뷰 ListTile
-                      return ListTile(
-                        title: Text(review),
-                        subtitle: StarDisplay(value: ratingInt),
-                        trailing: isReviewOwner
-                            ? Wrap(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      // + 버튼 클릭시 리뷰 생성 페이지로 이동
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) => UpdatePage(doc)),
-                                      );
-                                    },
-                                    icon: Icon(Icons.edit),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(CupertinoIcons.delete),
-                                    onPressed: () {
-                                      reviewService.delete(doc.id);
-                                      hasReview = false;
-                                    },
-                                  ),
-                                ],
-                              )
-                            : Text(''),
-                      );
-                    },
+                  return Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text("⭐️ " + (starCount / reviewCount).toString()),
+                          Text(" · "),
+                          Text("리뷰 수 " + reviewCount.toString() + "개"),
+                          SizedBox(
+                            width: 15,
+                          )
+                        ],
+                      ),
+                      ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: documents.length,
+                        itemBuilder: (context, index) {
+                          final doc = documents[index];
+                          String review = doc.get('review');
+                          double rating = doc.get('star');
+                          int ratingInt = rating.toInt();
+                          isReviewOwner = doc.get('uid') == user.uid;
+                          if (isReviewOwner == true) {
+                            hasReview = true;
+                          }
+                          starAdded += rating;
+                          //리뷰 ListTile
+                          return ListTile(
+                            title: Text(review),
+                            subtitle: StarDisplay(value: ratingInt),
+                            trailing: isReviewOwner
+                                ? Wrap(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          // + 버튼 클릭시 리뷰 생성 페이지로 이동
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    UpdatePage(doc)),
+                                          );
+                                        },
+                                        icon: Icon(Icons.edit),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(CupertinoIcons.delete),
+                                        onPressed: () {
+                                          reviewService.delete(doc.id);
+                                          hasReview = false;
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : Text(''),
+                          );
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
@@ -211,7 +233,6 @@ class _UpdatePageState extends State<UpdatePage> {
         appBar: AppBar(
           title: Text(
             "리뷰 수정",
-            style: TextStyle(color: Palette.green),
           ),
           // 뒤로가기 버튼
           leading: IconButton(
@@ -227,7 +248,7 @@ class _UpdatePageState extends State<UpdatePage> {
             children: [
               // 텍스트 입력창
               Text(
-                '리뷰',
+                '리뷰 수정하기',
               ),
               Expanded(
                 child: Column(
@@ -236,8 +257,12 @@ class _UpdatePageState extends State<UpdatePage> {
                       autofocus: true,
                       controller: jobController,
                       decoration: InputDecoration(
-                        hintText: "후기를 남겨주세요",
-                      ),
+                          hintText: "후기를 남겨주세요",
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Palette.green),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Palette.green))),
                     ),
                     SizedBox(height: 30),
                     Text('별점 남기기'),
@@ -260,11 +285,12 @@ class _UpdatePageState extends State<UpdatePage> {
                   ],
                 ),
               ),
-              // 추가하기 버튼
+              // 수정하기 버튼
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(primary: Palette.green),
                   child: Text(
                     "수정하기",
                     style: TextStyle(
@@ -309,7 +335,9 @@ class _CreatePageState extends State<CreatePage> {
     return Consumer<ReviewService>(builder: (context, reviewService, child) {
       return Scaffold(
         appBar: AppBar(
-          title: Text("리뷰 작성"),
+          title: Text(
+            "리뷰 작성",
+          ),
           // 뒤로가기 버튼
           leading: IconButton(
             icon: Icon(CupertinoIcons.chevron_back),
@@ -333,8 +361,12 @@ class _CreatePageState extends State<CreatePage> {
                       autofocus: true,
                       controller: jobController,
                       decoration: InputDecoration(
-                        hintText: "후기를 남겨주세요",
-                      ),
+                          hintText: "후기를 남겨주세요",
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Palette.green),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Palette.green))),
                     ),
                     SizedBox(height: 30),
                     Text('별점 남기기'),
@@ -362,6 +394,7 @@ class _CreatePageState extends State<CreatePage> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(primary: Palette.green),
                   child: Text(
                     "리뷰 남기기",
                     style: TextStyle(

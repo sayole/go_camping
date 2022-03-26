@@ -22,21 +22,6 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Consumer<SearchService>(builder: (context, searchService, child) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "검색 페이지",
-            style: TextStyle(color: Palette.green),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.account_circle,
-                color: Palette.green,
-              ),
-            ),
-          ],
-        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -103,133 +88,142 @@ class _SearchPageState extends State<SearchPage> {
                                   ),
                                 );
                               },
-                              child: Card(
-                                color: Color(0xFFE7E4D3),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20.0),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: SizedBox(
-                                          height: 130,
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: item.firstImageUrl.isEmpty
-                                                ? Image.asset(
-                                                    'assets/photo_not_ready2.png',
-                                                    fit: BoxFit.cover,
-                                                  )
-                                                : Image.network(
-                                                    item.firstImageUrl,
-                                                    fit: BoxFit.cover,
-                                                  ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Card(
+                                  color: Color(0xFFE7E4D3),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 2,
+                                          child: SizedBox(
+                                            height: 115,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: item.firstImageUrl.isEmpty
+                                                  ? Image.asset(
+                                                      'assets/photo_not_ready2.png',
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.network(
+                                                      item.firstImageUrl,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Container(
-                                          height: 130,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              SizedBox(
-                                                height: 21,
-                                                child: Wrap(
-                                                  alignment:
-                                                      WrapAlignment.start,
-                                                  spacing: 8,
-                                                  children: [
-                                                    ...item.featureList
-                                                        .where((e) =>
-                                                            e['value'] == 'Y' ||
-                                                            e['value'] == '가능')
-                                                        .take(2)
-                                                        .map((e) => Container(
-                                                              decoration: BoxDecoration(
-                                                                  color: Colors
-                                                                      .green,
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              30)),
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                            .fromLTRB(
-                                                                        8,
-                                                                        2,
-                                                                        8,
-                                                                        4),
-                                                                child: Text(
-                                                                  e['name'],
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        10,
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Expanded(
+                                          flex: 3,
+                                          child: Container(
+                                            height: 115,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  height: 21,
+                                                  child: Wrap(
+                                                    alignment:
+                                                        WrapAlignment.start,
+                                                    spacing: 8,
+                                                    children: [
+                                                      ...item.featureList
+                                                          .where((e) =>
+                                                              e['value'] ==
+                                                                  'Y' ||
+                                                              e['value'] ==
+                                                                  '가능')
+                                                          .take(2)
+                                                          .map((e) => Container(
+                                                                decoration: BoxDecoration(
                                                                     color: Colors
-                                                                        .white,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
+                                                                        .green,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            30)),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                              .fromLTRB(
+                                                                          8,
+                                                                          2,
+                                                                          8,
+                                                                          4),
+                                                                  child: Text(
+                                                                    e['name'],
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          10,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                            ))
-                                                  ],
+                                                              ))
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              Text(
-                                                item.facltNm,
-                                                style: TextStyle(fontSize: 18),
-                                              ),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          vertical: 4),
-                                                      child: Text(
-                                                        item.lineIntro,
+                                                Text(
+                                                  item.facltNm,
+                                                  style:
+                                                      TextStyle(fontSize: 18),
+                                                ),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                vertical: 4),
+                                                        child: Text(
+                                                          item.lineIntro,
+                                                          style: TextStyle(
+                                                              fontSize: 10),
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      Text(
+                                                        item.lctCl.trim(),
                                                         style: TextStyle(
                                                             fontSize: 10),
                                                       ),
-                                                    ),
-                                                    Spacer(),
-                                                    Text(
-                                                      item.lctCl.trim(),
-                                                      style: TextStyle(
-                                                          fontSize: 10),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              Text(
-                                                item.doNm +
-                                                    ' ' +
-                                                    item.sigunguNm,
-                                                style: TextStyle(fontSize: 10),
-                                              ),
-                                            ],
+                                                Text(
+                                                  item.doNm +
+                                                      ' ' +
+                                                      item.sigunguNm,
+                                                  style:
+                                                      TextStyle(fontSize: 10),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      )
-                                    ],
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),

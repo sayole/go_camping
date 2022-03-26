@@ -44,14 +44,27 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       TextField(
                         controller: emailController,
-                        decoration: InputDecoration(hintText: "이메일"),
+                        decoration: InputDecoration(
+                            hintText: "이메일",
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Palette.green),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black))),
                       ),
+                      SizedBox(height: 10),
 
                       /// 비밀번호
                       TextField(
                         controller: passwordController,
                         obscureText: false, // 비밀번호 안보이게
-                        decoration: InputDecoration(hintText: "PassWord"),
+                        decoration: InputDecoration(
+                            hintText: "PassWord",
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Palette.green),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black))),
                       ),
                       SizedBox(height: 30),
 
