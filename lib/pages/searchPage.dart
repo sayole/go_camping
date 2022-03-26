@@ -22,6 +22,21 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     return Consumer<SearchService>(builder: (context, searchService, child) {
       return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "검색 페이지",
+            style: TextStyle(color: Palette.green),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: Icon(
+                Icons.account_circle,
+                color: Palette.green,
+              ),
+            ),
+          ],
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(
@@ -72,20 +87,7 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 ),
                 searchService.campingList.isEmpty
-                    ? Center(
-                        child: Stack(children: [
-                          Image.asset(
-                            'assets/before_search.png',
-                            fit: BoxFit.cover,
-                          ),
-                          Positioned(
-                            top: 30,
-                            child: Center(
-                              child: Text('캠핑지 검색해보자!'),
-                            ),
-                          )
-                        ]),
-                      )
+                    ? Center(child: Text("캠핑지를 찾아보자"))
                     : Expanded(
                         child: ListView.builder(
                           itemCount: searchService.campingList.length,
@@ -102,6 +104,7 @@ class _SearchPageState extends State<SearchPage> {
                                 );
                               },
                               child: Card(
+                                color: Color(0xFFE7E4D3),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),

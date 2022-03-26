@@ -14,17 +14,13 @@ import 'loginPage.dart';
 import 'package:expandable_text/expandable_text.dart';
 
 /// 리뷰 보는 페이지
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
 var ratingSum = 0;
 var ratingList = [];
 
-class _HomePageState extends State<HomePage> {
+class HomePage extends StatelessWidget {
+  bool hasReview = false;
+  bool isReviewOwner = false;
+  int reviewCount = 0;
   @override
   Widget build(BuildContext context) {
     final authService = context.read<AuthService>();
@@ -79,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Text("⭐️ 4.24"),
                       Text(" · "),
-                      Text("리뷰 갯수 12개"),
+                      Text("리뷰 갯수 " + reviewCount.toString() + "개"),
                     ],
                   ),
                   Text(
@@ -116,7 +112,7 @@ class _HomePageState extends State<HomePage> {
                     reviewService.read(SelectedData.selectedItem?.contentId),
                 builder: (context, snapshot) {
                   final documents = snapshot.data?.docs ?? []; // 문서들 가져오기
-                  final docmany = documents.length;
+                  reviewCount = documents.length;
                   if (documents.isEmpty) {
                     return Center(child: Text("리뷰가 없어요! 남겨주세용"));
                   }
@@ -129,13 +125,17 @@ class _HomePageState extends State<HomePage> {
                       String review = doc.get('review');
                       double rating = doc.get('star');
                       int ratingInt = rating.toInt();
+                      isReviewOwner = doc.get('uid') == user.uid;
+                      if (isReviewOwner == true) {
+                        hasReview = true;
+                      }
+                      print(reviewCount);
                       //리뷰 ListTile
                       return ListTile(
                         title: Text(review),
                         subtitle: StarDisplay(value: ratingInt),
-                        trailing: doc.get('uid') != user.uid
-                            ? Text('')
-                            : Wrap(
+                        trailing: isReviewOwner
+                            ? Wrap(
                                 children: [
                                   IconButton(
                                     onPressed: () {
@@ -143,7 +143,7 @@ class _HomePageState extends State<HomePage> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (_) => CreatePage()),
+                                            builder: (_) => UpdatePage(doc)),
                                       );
                                     },
                                     icon: Icon(Icons.edit),
@@ -152,27 +152,140 @@ class _HomePageState extends State<HomePage> {
                                     icon: Icon(CupertinoIcons.delete),
                                     onPressed: () {
                                       reviewService.delete(doc.id);
+                                      hasReview = false;
                                     },
                                   ),
                                 ],
-                              ),
+                              )
+                            : Text(''),
                       );
                     },
                   );
                 },
               ),
             ),
+            SizedBox(
+              height: 70,
+            )
           ],
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: () {
+            if (hasReview == true) {
+              return;
+            }
             // + 버튼 클릭시 리뷰 생성 페이지로 이동
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => CreatePage()),
             );
           },
+        ),
+      );
+    });
+  }
+}
+
+double star = 0;
+
+class UpdatePage extends StatefulWidget {
+  final doc;
+
+  const UpdatePage(this.doc, {Key? key}) : super(key: key);
+
+  @override
+  State<UpdatePage> createState() => _UpdatePageState();
+}
+
+class _UpdatePageState extends State<UpdatePage> {
+  TextEditingController jobController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    jobController.text = widget.doc.get('review');
+    final authService = context.read<AuthService>();
+    final user = authService.currentUser()!;
+    return Consumer<ReviewService>(builder: (context, reviewService, child) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            "리뷰 수정",
+            style: TextStyle(color: Palette.green),
+          ),
+          // 뒤로가기 버튼
+          leading: IconButton(
+            icon: Icon(CupertinoIcons.chevron_back),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // 텍스트 입력창
+              Text(
+                '리뷰',
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    TextField(
+                      autofocus: true,
+                      controller: jobController,
+                      decoration: InputDecoration(
+                        hintText: "후기를 남겨주세요",
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    Text('별점 남기기'),
+                    RatingBar.builder(
+                      initialRating: widget.doc.get('star'),
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: false,
+                      itemCount: 5,
+                      itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                      itemBuilder: (context, _) => Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      ),
+                      onRatingUpdate: (rating) {
+                        print(rating);
+                        star = rating;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              // 추가하기 버튼
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  child: Text(
+                    "수정하기",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                  onPressed: () {
+                    // 추가하기 버튼 클릭시
+                    if (jobController.text.isNotEmpty) {
+                      reviewService.update(
+                          widget.doc.id, jobController.text, star);
+                      print('생성하기');
+                      Navigator.pop(
+                        context,
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       );
     });
@@ -186,8 +299,6 @@ class CreatePage extends StatefulWidget {
   @override
   State<CreatePage> createState() => _CreatePageState();
 }
-
-double star = 0;
 
 class _CreatePageState extends State<CreatePage> {
   TextEditingController jobController = TextEditingController();

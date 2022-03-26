@@ -25,9 +25,12 @@ class ReviewService extends ChangeNotifier {
     notifyListeners(); // 화면 갱신
   }
 
-  void update(String docId, String review) async {
+  void update(String docId, String review, double star) async {
     // review 업데이트
-    await reviewCollection.doc(docId).update({'review': review});
+    await reviewCollection.doc(docId).update({
+      'review': review,
+      'star': star,
+    });
     notifyListeners(); // 화면 갱신
   }
 
